@@ -43,6 +43,31 @@
       align-items: center;
     }
     
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .btn-icon {
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .btn-icon:active {
+      background: #e5e7eb;
+    }
+    
     .header-title {
       display: flex;
       align-items: center;
@@ -59,7 +84,6 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      font-size: 24px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -68,6 +92,10 @@
     
     .btn-add:active {
       background: #2563eb;
+    }
+    
+    .btn-add svg {
+      stroke: white;
     }
     
     .container {
@@ -422,12 +450,6 @@
       text-align: center;
     }
     
-    .empty-icon {
-      font-size: 48px;
-      margin-bottom: 8px;
-      opacity: 0.3;
-    }
-    
     .empty-text {
       color: #6b7280;
       margin-bottom: 4px;
@@ -447,9 +469,37 @@
   <div class="header">
     <div class="header-content">
       <div class="header-title">
-        📅 Time Off
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Time Off
       </div>
-      <button class="btn-add" onclick="toggleForm()">+</button>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="exportData()" title="Export data">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <label class="btn-icon" title="Import data">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+        </label>
+        <button class="btn-add" onclick="toggleForm()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -474,7 +524,13 @@
     </div>
 
     <div class="breakdown">
-      <div class="breakdown-title">📈 Breakdown</div>
+      <div class="breakdown-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
+        </svg>
+        Breakdown
+      </div>
       <div class="breakdown-item">
         <div class="breakdown-label">
           <div class="breakdown-dot color-vacation"></div>
@@ -552,7 +608,15 @@
     </div>
 
     <div class="breakdown">
-      <div class="breakdown-title">📅 Monthly View</div>
+      <div class="breakdown-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Monthly View
+      </div>
       <div id="monthlyBreakdown"></div>
     </div>
 
@@ -986,6 +1050,60 @@
         '€' + revenue.toLocaleString('nl-BE', { maximumFractionDigits: 0 });
     }
 
+    function exportData() {
+      const data = {
+        entries: entries,
+        dayRate: document.getElementById('dayRate').value,
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'timeoff-backup-' + new Date().toISOString().split('T')[0] + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (!data.entries || !Array.isArray(data.entries)) {
+            alert('Invalid backup file');
+            return;
+          }
+          
+          if (confirm('This will replace all current data. Continue?')) {
+            entries = data.entries;
+            
+            if (data.dayRate) {
+              document.getElementById('dayRate').value = data.dayRate;
+            }
+            
+            saveEntries();
+            render();
+            alert('Data imported successfully!');
+          }
+        } catch (err) {
+          alert('Failed to import: ' + err.message);
+        }
+        
+        // Reset file input
+        event.target.value = '';
+      };
+      
+      reader.readAsText(file);
+    }
+
     function render() {
       // Calculate totals
       const totals = { vacation: 0, sick: 0, total: 0 };
@@ -1045,7 +1163,12 @@
       if (entries.length === 0) {
         entriesEl.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">📅</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3; margin-bottom: 8px;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
             <div class="empty-text">No time off registered yet</div>
             <div class="empty-hint">Click + to add your first entry</div>
           </div>
