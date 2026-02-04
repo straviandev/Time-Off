@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Time Off">
+  <title>Time Off Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: #f9fafb;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    
+    input, select, button {
+      font-size: 16px;
+    }
+    
+    .header {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .header-content {
+      max-width: 448px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .btn-add {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-add:active {
+      background: #2563eb;
+    }
+    
+    .container {
+      max-width: 448px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .summary-card {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .summary-label {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .summary-value {
+      font-size: 30px;
+      font-weight: bold;
+      color: #111827;
+    }
+    
+    .revenue-calc {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .revenue-label {
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .rate-input {
+      width: 70px;
+      padding: 4px 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+      text-align: right;
+    }
+    
+    .revenue-value {
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .breakdown {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    
+    .breakdown-title {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 12px;
+    }
+    
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .breakdown-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+    }
+    
+    .breakdown-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .breakdown-value {
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .month-item {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    
+    .month-item:first-child {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+    }
+    
+    .month-header {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    
+    .month-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 14px;
+    }
+    
+    .month-stat {
+      color: #6b7280;
+    }
+    
+    .month-stat strong {
+      color: #111827;
+    }
+    
+    .form {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      display: none;
+    }
+    
+    .form.show {
+      display: block;
+    }
+    
+    .form-title {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 12px;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .form-input, .form-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .form-preview {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 14px;
+      color: #1e40af;
+      margin-bottom: 12px;
+    }
+    
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .mode-btn {
+      padding: 10px;
+      border: 2px solid #d1d5db;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      text-align: center;
+    }
+    
+    .mode-btn.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #3b82f6;
+    }
+    
+    .date-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .date-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    
+    .date-item:hover {
+      background: #f9fafb;
+    }
+    
+    .date-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .date-item-label {
+      flex: 1;
+      font-size: 14px;
+      color: #374151;
+    }
+    
+    .date-item.weekend {
+      opacity: 0.5;
+    }
+    
+    .form-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      flex: 1;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .btn-primary:active {
+      background: #2563eb;
+    }
+    
+    .btn-secondary {
+      padding: 10px 16px;
+      border: 1px solid #d1d5db;
+      background: white;
+      color: #374151;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .btn-secondary:active {
+      background: #f9fafb;
+    }
+    
+    .entries-title {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    
+    .entry {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+    
+    .entry-content {
+      flex: 1;
+    }
+    
+    .entry-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .entry-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .entry-type {
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    .entry-days {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    .entry-date {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    .entry-note {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 20px;
+    }
+    
+    .empty-state {
+      background: white;
+      border-radius: 8px;
+      padding: 48px 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+      opacity: 0.3;
+    }
+    
+    .empty-text {
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .empty-hint {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    
+    .color-vacation { background: #3b82f6; }
+    .color-sick { background: #ef4444; }
+    .color-personal { background: #a855f7; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <div class="header-title">
+        📅 Time Off
+      </div>
+      <button class="btn-add" onclick="toggleForm()">+</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Days Off (2026)</div>
+        <div class="summary-value" id="yearDays">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Projected Billable</div>
+        <div class="summary-value" id="projectedDays">0</div>
+      </div>
+    </div>
+
+    <div class="revenue-calc">
+      <div class="revenue-label">
+        Day rate: 
+        <input type="number" id="dayRate" value="650" class="rate-input" onchange="updateRevenue()">€
+      </div>
+      <div class="revenue-value" id="projectedRevenue">€0</div>
+    </div>
+
+    <div class="breakdown">
+      <div class="breakdown-title">📈 Breakdown</div>
+      <div class="breakdown-item">
+        <div class="breakdown-label">
+          <div class="breakdown-dot color-vacation"></div>
+          <span>Vacation</span>
+        </div>
+        <div class="breakdown-value" id="vacationDays">0 days</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-label">
+          <div class="breakdown-dot color-sick"></div>
+          <span>Sick</span>
+        </div>
+        <div class="breakdown-value" id="sickDays">0 days</div>
+      </div>
+    </div>
+
+    <div class="form" id="form">
+      <div class="form-title">Add Time Off</div>
+      
+      <div class="form-group">
+        <label class="form-label">Mode</label>
+        <div class="mode-selector">
+          <button type="button" class="mode-btn active" onclick="setMode('half')" id="modeHalf">
+            Half Day
+          </button>
+          <button type="button" class="mode-btn" onclick="setMode('full')" id="modeFull">
+            Full Day
+          </button>
+          <button type="button" class="mode-btn" onclick="setMode('period')" id="modePeriod">
+            Period
+          </button>
+        </div>
+      </div>
+
+      <div id="singleDayFields">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="singleDate">
+        </div>
+      </div>
+
+      <div id="periodFields" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input type="date" class="form-input" id="startDate" onchange="generateDateList()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date</label>
+          <input type="date" class="form-input" id="endDate" onchange="generateDateList()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Days Off</label>
+          <div class="date-list" id="dateList"></div>
+        </div>
+      </div>
+
+      <div class="form-preview" id="preview">
+        <strong>0.5</strong> days selected
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select" id="type">
+          <option value="vacation">Vacation</option>
+          <option value="sick">Sick</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note (optional)</label>
+        <input type="text" class="form-input" id="note" placeholder="e.g., Trip to France">
+      </div>
+      <div class="form-buttons">
+        <button class="btn-primary" onclick="addEntry()">Add Entry</button>
+        <button class="btn-secondary" onclick="toggleForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <div class="breakdown-title">📅 Monthly View</div>
+      <div id="monthlyBreakdown"></div>
+    </div>
+
+    <div class="entries-title">Recent Entries</div>
+    <div id="entries"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'timeoff-entries';
+    let entries = [];
+    let currentMode = 'half';
+
+    // Belgian bank holidays (fixed and moveable dates for 2025-2027)
+    const BELGIAN_HOLIDAYS = {
+      2025: [
+        '2025-01-01', // New Year's Day
+        '2025-04-21', // Easter Monday
+        '2025-05-01', // Labour Day
+        '2025-05-29', // Ascension Day
+        '2025-06-09', // Whit Monday
+        '2025-07-21', // National Day
+        '2025-08-15', // Assumption of Mary
+        '2025-11-01', // All Saints' Day
+        '2025-11-11', // Armistice Day
+        '2025-12-25'  // Christmas Day
+      ],
+      2026: [
+        '2026-01-01', // New Year's Day
+        '2026-04-06', // Easter Monday
+        '2026-05-01', // Labour Day
+        '2026-05-14', // Ascension Day
+        '2026-05-25', // Whit Monday
+        '2026-07-21', // National Day
+        '2026-08-15', // Assumption of Mary
+        '2026-11-01', // All Saints' Day
+        '2026-11-11', // Armistice Day
+        '2026-12-25'  // Christmas Day
+      ],
+      2027: [
+        '2027-01-01', // New Year's Day
+        '2027-03-29', // Easter Monday
+        '2027-05-01', // Labour Day
+        '2027-05-06', // Ascension Day
+        '2027-05-17', // Whit Monday
+        '2027-07-21', // National Day
+        '2027-08-15', // Assumption of Mary
+        '2027-11-01', // All Saints' Day
+        '2027-11-11', // Armistice Day
+        '2027-12-25'  // Christmas Day
+      ]
+    };
+
+    function isBankHoliday(dateStr) {
+      const date = new Date(dateStr + 'T00:00:00');
+      const year = date.getFullYear();
+      const holidays = BELGIAN_HOLIDAYS[year] || [];
+      return holidays.includes(dateStr);
+    }
+
+    function loadEntries() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          entries = JSON.parse(stored);
+          
+          // Migrate: convert all 'personal' to 'vacation'
+          let migrated = false;
+          entries.forEach(entry => {
+            if (entry.type === 'personal') {
+              entry.type = 'vacation';
+              migrated = true;
+            }
+          });
+          
+          // Save back if we migrated anything
+          if (migrated) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load entries', e);
+      }
+      render();
+    }
+
+    function saveEntries() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      } catch (e) {
+        alert('Failed to save entry');
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      
+      // Update button styles
+      document.getElementById('modeHalf').classList.remove('active');
+      document.getElementById('modeFull').classList.remove('active');
+      document.getElementById('modePeriod').classList.remove('active');
+      document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+      
+      // Show/hide fields
+      if (mode === 'period') {
+        document.getElementById('singleDayFields').style.display = 'none';
+        document.getElementById('periodFields').style.display = 'block';
+        generateDateList();
+      } else {
+        document.getElementById('singleDayFields').style.display = 'block';
+        document.getElementById('periodFields').style.display = 'none';
+        updatePreview();
+      }
+    }
+
+    function isWeekend(date) {
+      const dayOfWeek = date.getDay();
+      return dayOfWeek === 0 || dayOfWeek === 6;
+    }
+
+    function generateDateList() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const dateListEl = document.getElementById('dateList');
+      
+      if (!startDate || !endDate) {
+        dateListEl.innerHTML = '<div style="padding: 8px; color: #9ca3af;">Select start and end dates</div>';
+        updatePreview();
+        return;
+      }
+      
+      if (endDate < startDate) {
+        document.getElementById('endDate').value = startDate;
+        // Re-run after fixing the date
+        setTimeout(generateDateList, 0);
+        return;
+      }
+      
+      const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+      const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+      
+      const start = new Date(startYear, startMonth - 1, startDay);
+      const end = new Date(endYear, endMonth - 1, endDay);
+      
+      let html = '';
+      const current = new Date(start);
+      
+      while (current <= end) {
+        // Format as YYYY-MM-DD without timezone conversion
+        const year = current.getFullYear();
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        const day = String(current.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const isWeekendDay = isWeekend(current);
+        const dayName = current.toLocaleDateString('en-GB', { weekday: 'short' });
+        const dateDisplay = current.toLocaleDateString('en-GB', { 
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+        
+        html += `
+          <div class="date-item ${isWeekendDay ? 'weekend' : ''}">
+            <input type="checkbox" id="date-${dateStr}" value="${dateStr}" 
+              ${!isWeekendDay ? 'checked' : ''} onchange="updatePreview()">
+            <label class="date-item-label" for="date-${dateStr}">
+              ${dayName} ${dateDisplay}
+            </label>
+          </div>
+        `;
+        
+        current.setDate(current.getDate() + 1);
+      }
+      
+      dateListEl.innerHTML = html;
+      updatePreview();
+    }
+
+    function getSelectedDates() {
+      const checkboxes = document.querySelectorAll('#dateList input[type="checkbox"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value).sort();
+    }
+
+    function toggleForm() {
+      const form = document.getElementById('form');
+      const isShowing = form.classList.contains('show');
+      
+      if (isShowing) {
+        form.classList.remove('show');
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('singleDate').value = today;
+        document.getElementById('startDate').value = today;
+        document.getElementById('endDate').value = today;
+        document.getElementById('type').value = 'vacation';
+        document.getElementById('note').value = '';
+        
+        // Reset to half day mode
+        currentMode = 'half';
+        setMode('half');
+        
+        form.classList.add('show');
+      }
+    }
+
+    function updatePreview() {
+      let totalDays = 0;
+      
+      if (currentMode === 'half') {
+        totalDays = 0.5;
+      } else if (currentMode === 'full') {
+        totalDays = 1;
+      } else if (currentMode === 'period') {
+        const selectedDates = getSelectedDates();
+        totalDays = selectedDates.length;
+      }
+      
+      const preview = document.getElementById('preview');
+      preview.innerHTML = `<strong>${totalDays}</strong> day${totalDays !== 1 ? 's' : ''} selected`;
+    }
+
+    function addEntry() {
+      const type = document.getElementById('type').value;
+      const note = document.getElementById('note').value;
+      let totalDays, startDate, endDate, selectedDates;
+      
+      if (currentMode === 'half' || currentMode === 'full') {
+        const singleDate = document.getElementById('singleDate').value;
+        if (!singleDate) {
+          alert('Please select a date');
+          return;
+        }
+        
+        totalDays = currentMode === 'half' ? 0.5 : 1;
+        startDate = singleDate;
+        endDate = singleDate;
+        selectedDates = [singleDate];
+        
+      } else if (currentMode === 'period') {
+        selectedDates = getSelectedDates();
+        if (selectedDates.length === 0) {
+          alert('Please select at least one day');
+          return;
+        }
+        
+        totalDays = selectedDates.length;
+        startDate = selectedDates[0];
+        endDate = selectedDates[selectedDates.length - 1];
+      }
+      
+      const entry = {
+        id: Date.now(),
+        date: startDate,
+        end_date: endDate,
+        type: type,
+        days: totalDays,
+        note: note,
+        selected_dates: selectedDates,
+        mode: currentMode
+      };
+      
+      entries.push(entry);
+      entries.sort((a, b) => {
+        // Compare dates as strings (YYYY-MM-DD format sorts correctly)
+        if (b.date !== a.date) return b.date.localeCompare(a.date);
+        return b.id - a.id;
+      });
+      
+      saveEntries();
+      toggleForm();
+      render();
+    }
+
+    function deleteEntry(id) {
+      if (confirm('Delete this entry?')) {
+        entries = entries.filter(e => e.id !== id);
+        saveEntries();
+        render();
+      }
+    }
+
+    function formatDate(dateStr) {
+      // Parse as local date to avoid timezone shifts
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      
+      return date.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function getTypeLabel(type) {
+      const labels = {
+        vacation: 'Vacation',
+        sick: 'Sick',
+        personal: 'Personal'
+      };
+      return labels[type] || type;
+    }
+
+    function getBusinessDaysInMonth(year, month) {
+      // month is 0-indexed (0 = January)
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      
+      let count = 0;
+      const current = new Date(firstDay);
+      
+      while (current <= lastDay) {
+        const dateStr = current.toISOString().split('T')[0];
+        if (!isWeekend(current) && !isBankHoliday(dateStr)) {
+          count++;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      
+      return count;
+    }
+
+    function getMonthlyBreakdown() {
+      const currentYear = new Date().getFullYear();
+      const monthlyData = {};
+      
+      // Initialize all 12 months of current year
+      for (let month = 0; month < 12; month++) {
+        const monthKey = `${currentYear}-${String(month + 1).padStart(2, '0')}`;
+        monthlyData[monthKey] = {
+          year: currentYear,
+          month: month,
+          daysOff: 0,
+          bankHolidays: 0
+        };
+      }
+      
+      // Add user's time off entries
+      entries.forEach(entry => {
+        const dates = entry.selected_dates || [entry.date];
+        const daysPerDate = entry.mode === 'half' ? 0.5 : 1;
+        
+        dates.forEach(dateStr => {
+          const [year, month, day] = dateStr.split('-').map(Number);
+          if (year !== currentYear) return; // Only current year
+          
+          const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+          
+          if (monthlyData[monthKey]) {
+            monthlyData[monthKey].daysOff += daysPerDate;
+          }
+        });
+      });
+      
+      // Count bank holidays for each month
+      const holidays = BELGIAN_HOLIDAYS[currentYear] || [];
+      holidays.forEach(holidayStr => {
+        const [year, month, day] = holidayStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        
+        if (!isWeekend(date)) { // Only count if it falls on a weekday
+          const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+          if (monthlyData[monthKey]) {
+            monthlyData[monthKey].bankHolidays += 1;
+          }
+        }
+      });
+      
+      // Convert to array and calculate billable days
+      return Object.entries(monthlyData)
+        .map(([key, data]) => {
+          const totalBusinessDays = getBusinessDaysInMonth(data.year, data.month);
+          const totalDaysOff = data.daysOff + data.bankHolidays;
+          
+          return {
+            key,
+            ...data,
+            totalBusinessDays,
+            totalDaysOff,
+            billableDays: totalBusinessDays - data.daysOff
+          };
+        })
+        .sort((a, b) => a.key.localeCompare(b.key)); // Chronological order
+    }
+
+    function getYearProjection() {
+      const currentYear = new Date().getFullYear();
+      let totalBusinessDays = 0;
+      let totalBankHolidays = 0;
+      let totalDaysOff = 0;
+      
+      // Calculate total business days in the year (weekdays only)
+      for (let month = 0; month < 12; month++) {
+        totalBusinessDays += getBusinessDaysInMonth(currentYear, month);
+      }
+      
+      // Count bank holidays on weekdays
+      const holidays = BELGIAN_HOLIDAYS[currentYear] || [];
+      holidays.forEach(holidayStr => {
+        const [year, month, day] = holidayStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        if (!isWeekend(date)) {
+          totalBankHolidays += 1;
+        }
+      });
+      
+      // Count user's days off for current year
+      entries.forEach(entry => {
+        const [year] = entry.date.split('-').map(Number);
+        if (year === currentYear) {
+          totalDaysOff += entry.days;
+        }
+      });
+      
+      // Projected billable = total business days - bank holidays - user days off
+      const projectedBillable = totalBusinessDays - totalBankHolidays - totalDaysOff;
+      
+      return {
+        totalBusinessDays,
+        totalBankHolidays,
+        totalDaysOff,
+        projectedBillable
+      };
+    }
+    
+    function updateRevenue() {
+      const projection = getYearProjection();
+      const dayRate = parseFloat(document.getElementById('dayRate').value) || 0;
+      const revenue = projection.projectedBillable * dayRate;
+      
+      document.getElementById('projectedRevenue').textContent = 
+        '€' + revenue.toLocaleString('nl-BE', { maximumFractionDigits: 0 });
+    }
+
+    function render() {
+      // Calculate totals
+      const totals = { vacation: 0, sick: 0, total: 0 };
+      const currentYear = new Date().getFullYear();
+      let yearTotal = 0;
+      
+      entries.forEach(entry => {
+        totals[entry.type] += entry.days;
+        totals.total += entry.days;
+        
+        const [year] = entry.date.split('-').map(Number);
+        if (year === currentYear) {
+          yearTotal += entry.days;
+        }
+      });
+      
+      // Get year projection
+      const projection = getYearProjection();
+      
+      // Update summary
+      document.getElementById('yearDays').textContent = yearTotal;
+      document.getElementById('projectedDays').textContent = projection.projectedBillable;
+      
+      // Update revenue
+      updateRevenue();
+      
+      // Update breakdown
+      document.getElementById('vacationDays').textContent = `${totals.vacation} days`;
+      document.getElementById('sickDays').textContent = `${totals.sick} days`;
+      
+      // Render monthly breakdown
+      const monthlyBreakdown = getMonthlyBreakdown();
+      const monthlyEl = document.getElementById('monthlyBreakdown');
+      
+      monthlyEl.innerHTML = monthlyBreakdown.map(month => {
+        const monthName = new Date(month.year, month.month, 1).toLocaleDateString('en-GB', {
+          month: 'long',
+          year: 'numeric'
+        });
+        
+        return `
+          <div class="month-item">
+            <div class="month-header">${monthName}</div>
+            <div class="month-stats">
+              <div class="month-stat">Your days off: <strong>${month.daysOff}</strong></div>
+              <div class="month-stat">Bank holidays: <strong>${month.bankHolidays}</strong></div>
+              <div class="month-stat">Total off: <strong>${month.totalDaysOff}</strong></div>
+              <div class="month-stat">Billable: <strong>${month.billableDays}</strong></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Render entries
+      const entriesEl = document.getElementById('entries');
+      
+      if (entries.length === 0) {
+        entriesEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <div class="empty-text">No time off registered yet</div>
+            <div class="empty-hint">Click + to add your first entry</div>
+          </div>
+        `;
+      } else {
+        entriesEl.innerHTML = entries.map(entry => {
+          const dateDisplay = entry.date === entry.end_date
+            ? formatDate(entry.date)
+            : `${formatDate(entry.date)} → ${formatDate(entry.end_date)}`;
+          
+          const modeLabel = entry.mode === 'half' ? ' (half day)' : '';
+          
+          return `
+            <div class="entry">
+              <div class="entry-content">
+                <div class="entry-header">
+                  <div class="entry-dot color-${entry.type}"></div>
+                  <span class="entry-type">${getTypeLabel(entry.type)}</span>
+                  <span class="entry-days">• ${entry.days} ${entry.days === 1 ? 'day' : 'days'}${modeLabel}</span>
+                </div>
+                <div class="entry-date">${dateDisplay}</div>
+                ${entry.note ? `<div class="entry-note">${entry.note}</div>` : ''}
+              </div>
+              <button class="btn-delete" onclick="deleteEntry(${entry.id})">🗑️</button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Initialize
+    loadEntries();
+  </script>
+</body>
+</html>
