@@ -385,23 +385,63 @@
       text-align: center;
     }
     
-    .form {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 16px;
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
       display: none;
     }
     
-    .form.show {
-      display: block;
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .form-title {
+    .modal-container {
+      background: white;
+      border-radius: 12px;
+      max-width: 440px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-title {
+      font-size: 18px;
       font-weight: 600;
       color: #111827;
-      margin-bottom: 12px;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-body {
+      padding: 20px;
     }
     
     .form-group {
@@ -707,66 +747,6 @@
       </div>
     </div>
 
-    <div class="form" id="form">
-      <div class="form-title">Add Time Off</div>
-      
-      <div class="form-group">
-        <label class="form-label">Mode</label>
-        <div class="mode-selector">
-          <button type="button" class="mode-btn active" onclick="setMode('half')" id="modeHalf">
-            Half Day
-          </button>
-          <button type="button" class="mode-btn" onclick="setMode('full')" id="modeFull">
-            Full Day
-          </button>
-          <button type="button" class="mode-btn" onclick="setMode('period')" id="modePeriod">
-            Period
-          </button>
-        </div>
-      </div>
-
-      <div id="singleDayFields">
-        <div class="form-group">
-          <label class="form-label">Date</label>
-          <input type="date" class="form-input" id="singleDate">
-        </div>
-      </div>
-
-      <div id="periodFields" style="display: none;">
-        <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input type="date" class="form-input" id="startDate" onchange="generateDateList()">
-        </div>
-        <div class="form-group">
-          <label class="form-label">End Date</label>
-          <input type="date" class="form-input" id="endDate" onchange="generateDateList()">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Select Days Off</label>
-          <div class="date-list" id="dateList"></div>
-        </div>
-      </div>
-
-      <div class="form-preview" id="preview">
-        <strong>0.5</strong> days selected
-      </div>
-      <div class="form-group">
-        <label class="form-label">Type</label>
-        <select class="form-select" id="type">
-          <option value="vacation">Vacation</option>
-          <option value="sick">Sick</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Note (optional)</label>
-        <input type="text" class="form-input" id="note" placeholder="e.g., Trip to France">
-      </div>
-      <div class="form-buttons">
-        <button class="btn-primary" onclick="addEntry()">Add Entry</button>
-        <button class="btn-secondary" onclick="toggleForm()">Cancel</button>
-      </div>
-    </div>
-
     <div class="breakdown">
       <div class="breakdown-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
@@ -795,6 +775,73 @@
 
     <div class="entries-title">Last 3 Entries</div>
     <div id="entries"></div>
+  </div>
+
+  <!-- Modal Popup for Add Entry Form -->
+  <div class="modal-overlay" id="formModal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">Add Time Off</div>
+        <button class="modal-close" onclick="toggleForm()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Mode</label>
+          <div class="mode-selector">
+            <button type="button" class="mode-btn active" onclick="setMode('half')" id="modeHalf">
+              Half Day
+            </button>
+            <button type="button" class="mode-btn" onclick="setMode('full')" id="modeFull">
+              Full Day
+            </button>
+            <button type="button" class="mode-btn" onclick="setMode('period')" id="modePeriod">
+              Period
+            </button>
+          </div>
+        </div>
+
+        <div id="singleDayFields">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="singleDate">
+          </div>
+        </div>
+
+        <div id="periodFields" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-input" id="startDate" onchange="generateDateList()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-input" id="endDate" onchange="generateDateList()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Select Days Off</label>
+            <div class="date-list" id="dateList"></div>
+          </div>
+        </div>
+
+        <div class="form-preview" id="preview">
+          <strong>0.5</strong> days selected
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="type">
+            <option value="vacation">Vacation</option>
+            <option value="sick">Sick</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note (optional)</label>
+          <input type="text" class="form-input" id="note" placeholder="e.g., Trip to France">
+        </div>
+        <div class="form-buttons">
+          <button class="btn-primary" onclick="addEntry()">Add Entry</button>
+          <button class="btn-secondary" onclick="toggleForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1013,11 +1060,11 @@
     }
 
     function toggleForm() {
-      const form = document.getElementById('form');
-      const isShowing = form.classList.contains('show');
+      const modal = document.getElementById('formModal');
+      const isShowing = modal.classList.contains('active');
       
       if (isShowing) {
-        form.classList.remove('show');
+        modal.classList.remove('active');
       } else {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('singleDate').value = today;
@@ -1030,7 +1077,13 @@
         currentMode = 'half';
         setMode('half');
         
-        form.classList.add('show');
+        modal.classList.add('active');
+      }
+    }
+    
+    function closeModalOnOverlay(event) {
+      if (event.target.id === 'formModal') {
+        toggleForm();
       }
     }
 
