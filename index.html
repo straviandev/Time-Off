@@ -160,6 +160,28 @@
       line-height: 1.4;
     }
     
+    .coffee-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFDD00;
+      color: #000000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    
+    .coffee-button:hover {
+      background: #FFED4E;
+    }
+    
+    .coffee-button svg {
+      stroke: #000000;
+    }
+    
     .container {
       max-width: 480px;
       margin: 0 auto;
@@ -1129,6 +1151,23 @@
             </label>
             <div class="settings-hint">When disabled, bank holidays count as billable days (useful for international freelancers)</div>
           </div>
+        </div>
+        
+        <div class="settings-section" style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+          <div class="settings-label">Support</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">
+            Enjoying this app? Consider buying me a coffee to help keep it free and ad-free.
+          </div>
+          <a href="https://buymeacoffee.com/straviandev" target="_blank" rel="noopener noreferrer" class="coffee-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+              <line x1="6" y1="1" x2="6" y2="4"></line>
+              <line x1="10" y1="1" x2="10" y2="4"></line>
+              <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+            Buy Me a Coffee
+          </a>
         </div>
       </div>
     </div>
