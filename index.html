@@ -1588,19 +1588,17 @@
       let totalBankHolidays = 0;
       let totalDaysOff = 0;
       
-      // Calculate total business days in the year (weekdays only)
+      // getBusinessDaysInMonth already excludes bank holidays and weekends per settings
       for (let month = 0; month < 12; month++) {
         totalBusinessDays += getBusinessDaysInMonth(year, month);
       }
       
-      // Count bank holidays on weekdays (only if setting is enabled)
+      // Count bank holidays for display purposes only (not subtracted again)
       if (excludeBelgianHolidays) {
         const holidays = getBelgianHolidays(year);
         holidays.forEach(holidayStr => {
           const [y, month, day] = holidayStr.split('-').map(Number);
           const date = new Date(y, month - 1, day);
-          
-          // Only count if it's a weekday (or if weekends are included)
           const isWeekendDay = isWeekend(date);
           if (!excludeWeekends || !isWeekendDay) {
             totalBankHolidays += 1;
@@ -1616,8 +1614,8 @@
         }
       });
       
-      // Projected billable = total business days - bank holidays - user days off
-      const projectedBillable = totalBusinessDays - totalBankHolidays - totalDaysOff;
+      // Projected billable = business days (already minus holidays) - user days off
+      const projectedBillable = totalBusinessDays - totalDaysOff;
       
       return {
         totalBusinessDays,
